@@ -43,10 +43,10 @@ graph TD
                 EC2_2("💻 Instancia EC2 2 (NGINX)"):::component
             end
 
-            %% Conexiones dentro de la VPC
-            IGW -->|Tráfico de Internet| ALB
-            ALB -->|HTTP Puerto 80| EC2_1
-            ALB -->|HTTP Puerto 80| EC2_2
+            %% Conexiones dentro de la VPC con etiquetas entrecomilladas
+            IGW -->|"Tráfico de Internet"| ALB
+            ALB -->|"HTTP Puerto 80"| EC2_1
+            ALB -->|"HTTP Puerto 80"| EC2_2
 
             %% Conexiones de Relación
             PUB1 -.- NAT1
@@ -55,20 +55,20 @@ graph TD
             PRI1 -.- EC2_1
             PRI2 -.- EC2_2
 
-            %% Tráfico de salida
-            EC2_1 -->|Tráfico de salida (Actualizaciones)| NAT1
-            EC2_2 -->|Tráfico de salida (Actualizaciones)| NAT1
+            %% Tráfico de salida corregido
+            EC2_1 -->|"Tráfico de salida (Actualizaciones)"| NAT1
+            EC2_2 -->|"Tráfico de salida (Actualizaciones)"| NAT1
         end
 
         %% Conexiones a servicios externos de la nube
         CW[("📊 Amazon CloudWatch Logs <br> /aws/ec2/self-healing-app/nginx")]:::aws
-        EC2_1 -.->|Flujo de Logs de NGINX| CW
-        EC2_2 -.->|Flujo de Logs de NGINX| CW
+        EC2_1 -.->|"Flujo de Logs de NGINX"| CW
+        EC2_2 -.->|"Flujo de Logs de NGINX"| CW
     end
 
     %% Conexiones de Auto Scaling
-    ASG -.->|Monitorea Salud y Reemplaza Nodos| EC2_1
-    ASG -.->|Monitorea Salud y Reemplaza Nodos| EC2_2
+    ASG -.->|"Monitorea Salud y Reemplaza Nodos"| EC2_1
+    ASG -.->|"Monitorea Salud y Reemplaza Nodos"| EC2_2
 
     %% Estilos de Contenedores
     style AWS_Cloud fill:#f4f6f7,stroke:#34495e,stroke-dasharray: 5 5
