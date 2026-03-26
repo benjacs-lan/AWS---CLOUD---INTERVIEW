@@ -1,11 +1,18 @@
-# 🚀 Self-Healing Cloud Infrastructure
-Arquitectura en la nube basica, de alta disponibilidad (HA) y tolerante a fallos, Usando herramientas Iac como **Terraform** en **AWS**. Diseñada con un paradigma de "autorreparación" para eliminar puntos únicos de fallo (SPOF) mediante grupos de escalado automático y balanceadores de carga de aplicaciones. 
+¡Excelente decisión\! Un README en un solo idioma se ve mucho más profesional y cohesionado. He traducido todas las secciones al español manteniendo la terminología técnica estándar (como *Launch Template*, *Auto Scaling Group*, etc., que se suelen dejar en inglés en el entorno técnico).
 
-Actualmente está configurado para ser probado localmente usando **LocalStack** donde  se utilizo **awslocal** y **tflocal**.
+Aquí tienes tu README completamente unificado:
 
-## 🏗️ Architecture Overview
+-----
 
-La VPC (virtual private CLoud) se extiende por dos zonas de disponibilidad (AZ). Los recursos informáticos se mantienen privados, mientras que el balanceador de carga de aplicaciones enruta el tráfico de internet de forma segura.
+# 🚀 Infraestructura Cloud con Self-Healing (Autorreparación)
+
+Arquitectura en la nube básica, de alta disponibilidad (HA) y tolerante a fallos, usando herramientas IaC como **Terraform** en **AWS**. Diseñada con un paradigma de "autorreparación" para eliminar puntos únicos de fallo (SPOF) mediante grupos de escalado automático y balanceadores de carga de aplicaciones.
+
+Actualmente está configurado para ser probado localmente usando **LocalStack** donde se utilizó **awslocal** y **tflocal**.
+
+## 🏗️ Resumen de la Arquitectura
+
+La VPC (Virtual Private Cloud) se extiende por dos zonas de disponibilidad (AZ). Los recursos informáticos se mantienen privados, mientras que el balanceador de carga de aplicaciones enruta el tráfico de internet de forma segura.
 
 ```mermaid
 graph TD
@@ -16,7 +23,7 @@ graph TD
     classDef component fill:#f9e79f,stroke:#f39c12,stroke-width:2px;
 
     %% Nube de AWS y VPC
-    subgraph AWS_Cloud ["☁️ AWS Cloud (Region us-east-1)"]
+    subgraph AWS_Cloud ["☁️ AWS Cloud (Región us-east-1)"]
         IGW(("Internet Gateway")):::aws
 
         subgraph VPC ["VPC (10.0.0.0/16)"]
@@ -24,22 +31,22 @@ graph TD
             ASG[["Auto Scaling Group (Desired: 2)"]]:::component
 
             subgraph AZ1 ["AZ 1 (us-east-1a)"]
-                PUB1["Public Subnet 1"]:::public
+                PUB1["Subred Pública 1"]:::public
                 NAT1(("NAT Gateway")):::aws
-                PRI1["Private Subnet App1"]:::private
-                EC2_1("💻 EC2 Instance 1 (NGINX)"):::component
+                PRI1["Subred Privada App1"]:::private
+                EC2_1("💻 Instancia EC2 1 (NGINX)"):::component
             end
 
             subgraph AZ2 ["AZ 2 (us-east-1b)"]
-                PUB2["Public Subnet 2"]:::public
-                PRI2["Private Subnet App2"]:::private
-                EC2_2("💻 EC2 Instance 2 (NGINX)"):::component
+                PUB2["Subred Pública 2"]:::public
+                PRI2["Subred Privada App2"]:::private
+                EC2_2("💻 Instancia EC2 2 (NGINX)"):::component
             end
 
             %% Conexiones dentro de la VPC
-            IGW -->|Internet Traffic| ALB
-            ALB -->|HTTP Port 80| EC2_1
-            ALB -->|HTTP Port 80| EC2_2
+            IGW -->|Tráfico de Internet| ALB
+            ALB -->|HTTP Puerto 80| EC2_1
+            ALB -->|HTTP Puerto 80| EC2_2
 
             %% Conexiones de Relación
             PUB1 -.- NAT1
@@ -48,20 +55,20 @@ graph TD
             PRI1 -.- EC2_1
             PRI2 -.- EC2_2
 
-            %% Tráfico de salida (basado en el flujo original)
-            EC2_1 -->|Outbound traffic (Updates)| NAT1
-            EC2_2 -->|Outbound traffic (Updates)| NAT1
+            %% Tráfico de salida
+            EC2_1 -->|Tráfico de salida (Actualizaciones)| NAT1
+            EC2_2 -->|Tráfico de salida (Actualizaciones)| NAT1
         end
 
         %% Conexiones a servicios externos de la nube
         CW[("📊 Amazon CloudWatch Logs <br> /aws/ec2/self-healing-app/nginx")]:::aws
-        EC2_1 -.->|Nginx Logs Stream| CW
-        EC2_2 -.->|Nginx Logs Stream| CW
+        EC2_1 -.->|Flujo de Logs de NGINX| CW
+        EC2_2 -.->|Flujo de Logs de NGINX| CW
     end
 
-    %% Conexiones de Auto Scaling (fuera de la capa VPC pero interactuando con los nodos)
-    ASG -.->|Monitors Health & Replaces Nodes| EC2_1
-    ASG -.->|Monitors Health & Replaces Nodes| EC2_2
+    %% Conexiones de Auto Scaling
+    ASG -.->|Monitorea Salud y Reemplaza Nodos| EC2_1
+    ASG -.->|Monitorea Salud y Reemplaza Nodos| EC2_2
 
     %% Estilos de Contenedores
     style AWS_Cloud fill:#f4f6f7,stroke:#34495e,stroke-dasharray: 5 5
@@ -70,57 +77,64 @@ graph TD
     style AZ2 fill:#ebeeeb,stroke:#bdc3c7
 ```
 
-## ✨ Key Features
+## ✨ Características Principales
 
-* **Aislamiento de red:** La subnet publica estara conectada a (ALB) que distribuira el trafico, la privada  
-* **Immutable Infrastructure:** EC2 instances are bootstrapped automatically via a **Launch Template** equipped with Nginx and the CloudWatch Agent.
-* **Self-Healing:** An **Auto Scaling Group** monitors instance health and replaces degraded nodes automatically without human intervention.
-* **Traffic Distribution:** An **Application Load Balancer (ALB)** routes traffic strictly to healthy nodes.
-* **Granular Security:** Zero direct internet access to EC2 instances. Security Groups strictly allow traffic exclusively from the ALB.
-* **Observability:** Centralized logs via **CloudWatch** extracting `/var/log/nginx/access.log` using the unified CloudWatch Agent in real-time.
+  * **Aislamiento de Red:** La arquitectura segmenta la red en dos capas. La **subred pública** contiene el ALB y el NAT Gateway, gestionando el tráfico entrante de Internet de forma segura. Las instancias de la aplicación residen en la **subred privada**, sin exposición directa a Internet, maximizando la seguridad.
+  * **Infraestructura Inmutable:** Las instancias EC2 se inicializan automáticamente a través de una **Launch Template** configurada con NGINX y el agente de CloudWatch.
+  * **Autorreparación (Self-Healing):** Un **Auto Scaling Group** monitorea la salud de las instancias y reemplaza los nodos degradados automáticamente sin intervención humana.
+  * **Distribución de Tráfico:** Un **Application Load Balancer (ALB)** enruta el tráfico estrictamente hacia los nodos en estado saludable.
+  * **Seguridad Granular:** Cero acceso directo a Internet para las instancias EC2. Los Security Groups permiten el tráfico entrante única y exclusivamente desde el ALB.
+  * **Observabilidad:** Registros (logs) centralizados a través de **CloudWatch**, extrayendo el archivo `/var/log/nginx/access.log` en tiempo real mediante el agente unificado de CloudWatch.
 
-> **Note on LocalStack:** ELBv2 and AutoScaling APIs are Pro features in LocalStack. The code within `main.tf` contains the exact production-ready setup for AWS but falls back to mock generic EC2 instances for local testing.
+> **Nota sobre LocalStack:** Las APIs de ELBv2 y AutoScaling son características de la versión Pro en LocalStack. El código dentro de `main.tf` contiene la configuración exacta lista para producción en AWS, pero utiliza instancias EC2 genéricas simuladas (mocks) para las pruebas locales.
 
-## 🛠️ Prerequisites
+## 🛠️ Requisitos Previos
 
-To run this locally, you will need:
-- [Docker](https://www.docker.com/) & [LocalStack](https://localstack.cloud/) running.
-- [Terraform](https://www.terraform.io/)
-- `tflocal` and `awslocal` CLI wrappers.
-- `make` utility.
+Para ejecutar este proyecto localmente, necesitarás:
 
-## 🚀 Quick Start (Local Deployment)
+  - [Docker](https://www.docker.com/) y [enlace sospechoso eliminado] en ejecución.
+  - [Terraform](https://www.terraform.io/)
+  - Wrappers de línea de comandos (CLI) `tflocal` y `awslocal`.
+  - Herramienta `make`.
 
-A `Makefile` is included to simplify the interaction with standard Terraform commands and LocalStack.
+## 🚀 Inicio Rápido (Despliegue Local)
 
-**1. Initialize Terraform Providers**
+Se incluye un archivo `Makefile` para simplificar la interacción con los comandos estándar de Terraform y LocalStack.
+
+**1. Inicializar los Proveedores de Terraform**
+
 ```bash
 make init
 ```
 
-**2. Preview Infrastructure Plan**
+**2. Previsualizar el Plan de Infraestructura**
+
 ```bash
 make plan
 ```
 
-**3. Deploy the Infrastructure**
+**3. Desplegar la Infraestructura**
+
 ```bash
 make apply
 ```
 
-**4. Check Running Instances Status**
+**4. Comprobar el Estado de las Instancias en Ejecución**
+
 ```bash
 make status
 ```
 
-**5. Clean up / Destroy Environment**
+**5. Limpiar / Destruir el Entorno**
+
 ```bash
 make destroy
 ```
 
-## 📁 Repository Structure
-* `main.tf` - Primary Terraform resources (VPC, Subnets, EC2, SG, ASG, ALB).
-* `variables.tf` - Dynamic configurations and CIDR blocks.
-* `provider.tf` - Setup for AWS/LocalStack endpoints.
-* `scripts/install_services.sh` - EC2 `user_data` script injecting CloudWatch config and bootstrapping NGINX.
-* `Makefile` - Convenience wrapper for local development commands.
+## 📁 Estructura del Repositorio
+
+  * `main.tf` - Recursos principales de Terraform (VPC, Subnets, EC2, SG, ASG, ALB).
+  * `variables.tf` - Configuraciones dinámicas y bloques CIDR.
+  * `provider.tf` - Configuración de los endpoints de AWS/LocalStack.
+  * `scripts/install_services.sh` - Script `user_data` de EC2 que inyecta la configuración de CloudWatch e inicializa NGINX.
+  * `Makefile` - Archivo de utilidades para simplificar los comandos de desarrollo local.
