@@ -1,8 +1,4 @@
-¡Excelente decisión\! Un README en un solo idioma se ve mucho más profesional y cohesionado. He traducido todas las secciones al español manteniendo la terminología técnica estándar (como *Launch Template*, *Auto Scaling Group*, etc., que se suelen dejar en inglés en el entorno técnico).
 
-Aquí tienes tu README completamente unificado:
-
------
 
 # 🚀 Infraestructura Cloud con Self-Healing (Autorreparación)
 
